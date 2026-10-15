@@ -80,9 +80,8 @@ Icônes : [Simple Icons](https://simpleicons.org) (CC0) et [Font Awesome Free](h
 
 ## Présentation PowerPoint
 
-`presentation/Presentation-BTS-SIO-SISR-Kylian-Grafeille.pptx` reprend tout le contenu du portfolio (15 diapos, même thème).
-Elle se modifie directement dans PowerPoint : remplacer le cercle « Photo de profil » et le cadre « Logo SIKA France »
-par les images, et remplir les zones jaunes.
+`presentation/Presentation-BTS-SIO-SISR-Kylian-Grafeille.pptx` reprend tout le contenu du portfolio (17 diapos, même thème), avec la photo, le logo et la capture Feedly.
+Elle se modifie directement dans PowerPoint ; seule l'organisation de SIKA reste à compléter (zone jaune).
 
 `presentation/generer-presentation.js` est le script qui a généré le fichier (facultatif) :
 `npm install pptxgenjs sharp react react-dom react-icons` puis `node presentation/generer-presentation.js`.

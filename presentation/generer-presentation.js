@@ -7,8 +7,9 @@ const React = require('react');
 const { renderToStaticMarkup } = require('react-dom/server');
 const fi = require('react-icons/fi');
 
-const REPO = path.join(__dirname, '..');
+const REPO = process.env.PORTFOLIO_DIR || path.join(__dirname, '..');
 const OUT = process.argv[2] || path.join(__dirname, 'Presentation-BTS-SIO-SISR-Kylian-Grafeille.pptx');
+const IMG = (f) => path.join(REPO, 'assets/img', f);
 
 // Palette reprise du site
 const C = {
@@ -38,11 +39,12 @@ async function brandIcon(file) {
   const fIcons = {
     globe: 'FiGlobe', monitor: 'FiMonitor', headphones: 'FiHeadphones', user: 'FiUser', shield: 'FiShield',
     grid: 'FiGrid', users: 'FiUsers', check: 'FiCheckCircle', server: 'FiServer', map: 'FiMapPin',
-    rss: 'FiRss', book: 'FiBookOpen', briefcase: 'FiBriefcase', target: 'FiTarget', wifi: 'FiWifi',
+    rss: 'FiRss', calendar: 'FiCalendar', book: 'FiBookOpen', briefcase: 'FiBriefcase', target: 'FiTarget', wifi: 'FiWifi',
     award: 'FiAward', camera: 'FiCamera', trending: 'FiTrendingUp', alert: 'FiAlertTriangle', zap: 'FiZap', file: 'FiFileText',
   };
   for (const [k, v] of Object.entries(fIcons)) I[k] = await featherIcon(v, C.green);
   for (const [k, v] of Object.entries({ blueRss: 'FiRss', blueFile: 'FiFileText' })) I[k] = await featherIcon(v, C.blue);
+  for (const [k, v] of Object.entries({ mutedCal: 'FiCalendar', mutedPin: 'FiMapPin' })) I[k] = await featherIcon(v, C.muted);
   for (const k of ['kalilinux', 'windows', 'cisco', 'vmware', 'github', 'linkedin']) I[k] = await brandIcon(k + '.svg');
 
   const pres = new pptxgen();
@@ -96,16 +98,16 @@ async function brandIcon(file) {
       text(s, [{ text: k + ' ', options: { color: C.blue } }, { text: v, options: { color: C.text } }],
         { x: tx + 0.3, y: ty + 0.58 + i * 0.33, w: tw - 0.5, h: 0.32, fontFace: MONO, fontSize: 14 }));
     // photo
-    s.addShape(pres.shapes.OVAL, { x: 8.95, y: 1.55, w: 3.5, h: 3.5, fill: { color: C.surface }, line: { color: C.green, width: 2.5 } });
-    text(s, 'Photo de profil\nà ajouter', { x: 8.95, y: 2.9, w: 3.5, h: 0.8, fontSize: 14, color: C.muted, align: 'center', valign: 'middle' });
-    text(s, 'BTS SIO · Option SISR · Lycée Robert Schuman', { x: 8.2, y: 5.4, w: 5, h: 0.35, fontFace: MONO, fontSize: 12, color: C.muted, align: 'center' });
-    s.addNotes('Présentation : nom, formation, entreprise d\'alternance. Remplacer le cercle par la photo (Insertion > Image, puis rogner en cercle).');
+    s.addImage({ path: IMG('photo.jpg'), x: 9.2, y: 1.55, w: 3.0, h: 3.0, rounding: true, sizing: { type: 'cover', w: 3.0, h: 3.0 }, altText: 'Photo de Kylian Grafeille Clément' });
+    s.addShape(pres.shapes.OVAL, { x: 9.2, y: 1.55, w: 3.0, h: 3.0, fill: { color: C.bg, transparency: 100 }, line: { color: C.green, width: 2.5 } });
+    text(s, 'BTS SIO · Option SISR · Lycée Robert Schuman', { x: 8.2, y: 4.9, w: 5, h: 0.35, fontFace: MONO, fontSize: 12, color: C.muted, align: 'center' });
+    s.addNotes('Présentation : nom, formation, entreprise d\'alternance.');
   }
 
   // ================= 2. SOMMAIRE =================
   {
     const s = newSlide('00', 'Sommaire');
-    const items = ['Présentation personnelle', 'Parcours de formation', 'Projet professionnel', "Présentation de l'entreprise", 'Compétences acquises',
+    const items = ['Présentation personnelle', 'Parcours de formation et expériences', 'Projet professionnel', "Présentation de l'entreprise", 'Compétences acquises',
       'Synthèse des compétences de la formation', 'Certifications', 'Outils', 'Veille technologique', 'Connecte'];
     const colW = (W - 2 * M - 0.3) / 2;
     items.forEach((t, i) => {
@@ -176,6 +178,36 @@ async function brandIcon(file) {
     });
   }
 
+  // ================= 4b. EXPÉRIENCES PROFESSIONNELLES =================
+  {
+    const s = newSlide('02', 'Expériences professionnelles');
+    const xps = [
+      ['Stage · Bac Pro SN – seconde', 'Stagiaire', 'Plaine Commune', 'Stage', 'Mai 2023 – juin 2023 · 2 mois', 'Seine-Saint-Denis, Île-de-France'],
+      ['Stage · Bac Pro SN – première', 'Stagiaire', 'Plaine Commune', 'Stage', 'Février 2024 – avril 2024 · 3 mois', 'Seine-Saint-Denis, Île-de-France'],
+      ["Job d'été", 'Agent de propreté', 'Plaine Commune', 'CDD', 'Août 2024 · 1 mois', 'Aubervilliers, Île-de-France'],
+      ['Stage · Bac Pro SN – terminale', 'Stagiaire', 'CBA Informatique Libérale', 'Stage', 'Novembre 2024 – décembre 2024 · 2 mois', "Avignon, Provence-Alpes-Côte d'Azur"],
+      ["Job d'été", 'Agent de propreté', 'Plaine Commune', 'Intérimaire', 'Juillet 2025 · 1 mois', 'Aubervilliers, Île-de-France'],
+      ['Stage · BTS SIO SISR – 1re année', 'Stagiaire informatique', 'VINCI Construction', 'Stage', 'Mai 2026 – juin 2026 · 2 mois', 'Boulogne-Billancourt, Île-de-France'],
+    ];
+    const cw = (W - 2 * M - 0.3) / 2, ch = 1.62, gap = 0.17;
+    xps.forEach(([ctx, poste, ent, contrat, dates, lieu], i) => {
+      const x = M + (i % 2) * (cw + 0.3), y = 1.7 + Math.floor(i / 2) * (ch + gap);
+      const stage = contrat === 'Stage';
+      card(s, x, y, cw, ch);
+      text(s, [{ text: String(i + 1).padStart(2, '0') + '  ', options: { color: C.green } }, { text: ctx, options: { color: C.muted } }],
+        { x: x + 0.3, y: y + 0.18, w: cw - 2.0, h: 0.3, fontFace: MONO, fontSize: 11, valign: 'middle' });
+      s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: x + cw - 1.55, y: y + 0.16, w: 1.3, h: 0.34, rectRadius: 0.15,
+        fill: { color: stage ? '13233A' : C.surface2 }, line: { color: stage ? '24466E' : C.border, width: 1 } });
+      text(s, contrat, { x: x + cw - 1.55, y: y + 0.16, w: 1.3, h: 0.34, fontFace: MONO, fontSize: 11, color: stage ? 'A5D6FF' : C.text, align: 'center', valign: 'middle' });
+      text(s, [{ text: poste, options: { color: C.white, bold: true } }, { text: '  —  ' + ent, options: { color: C.green, bold: true } }],
+        { x: x + 0.3, y: y + 0.55, w: cw - 0.5, h: 0.4, fontSize: 15, valign: 'middle', fit: 'shrink' });
+      s.addImage({ data: I.mutedCal, x: x + 0.3, y: y + 1.02, w: 0.2, h: 0.2 });
+      text(s, dates, { x: x + 0.6, y: y + 0.97, w: cw - 0.9, h: 0.3, fontSize: 12.5, valign: 'middle' });
+      s.addImage({ data: I.mutedPin, x: x + 0.3, y: y + 1.31, w: 0.2, h: 0.2 });
+      text(s, lieu, { x: x + 0.6, y: y + 1.26, w: cw - 0.9, h: 0.3, fontSize: 12.5, valign: 'middle', color: C.muted });
+    });
+  }
+
   // ================= 5. PROJET PROFESSIONNEL =================
   {
     const s = newSlide('03', 'Projet professionnel');
@@ -204,7 +236,7 @@ async function brandIcon(file) {
     const groups = [
       ['Réseaux', I.wifi, ['Réseaux', 'Adressage IP', 'Switchs Cisco, 3Com, Netgear', 'Routeurs D-Link, Netgear', 'Modems / ADSL', "Points d'accès Wi-Fi", 'DHCP', 'DNS']],
       ['Systèmes', I.server, ['Windows 7 / 10 / 11', 'Linux Debian', 'Windows Server 2022', 'Active Directory']],
-      ['Virtualisation', I.grid, ['VMware', 'VirtualBox', 'Hyper-V']],
+      ['Virtualisation', I.grid, ['VMware', 'VirtualBox', 'Hyper-V', 'Packet Tracer']],
       ['Support & sécurité', I.shield, ['Gestion de parc', 'Messagerie', 'Pack Office', 'Cybersécurité']],
     ];
     const gw = (W - 2 * M - 3 * 0.3) / 4;
@@ -220,9 +252,8 @@ async function brandIcon(file) {
   // ================= 7. ENTREPRISE =================
   {
     const s = newSlide('04', "Présentation de l'entreprise");
-    // logo placeholder
-    card(s, M, 1.85, 3.2, 2.4);
-    text(s, 'Logo SIKA France\nà ajouter', { x: M, y: 1.85, w: 3.2, h: 2.4, fontSize: 14, color: C.muted, align: 'center', valign: 'middle' });
+    card(s, M, 1.85, 3.2, 2.4, 'FFFFFF');
+    s.addImage({ path: IMG('logo-sika.png'), x: M + 0.5, y: 1.95, w: 2.2, h: 2.2, altText: 'Logo Sika' });
     text(s, 'SIKA FRANCE', { x: M + 3.6, y: 1.85, w: 8, h: 0.6, fontSize: 30, bold: true, color: C.white });
     const stats = [['Secteur', 'BTP / industrie chimique'], ['Localité', 'Le Bourget'], ['Effectif', '≈ 1 200 – 1 500']];
     const sw = (W - M - (M + 3.6) - 0.5) / 3;
@@ -250,7 +281,7 @@ async function brandIcon(file) {
   // ================= 8. ÉQUIPE =================
   {
     const s = newSlide('04', 'Mon équipe et ma place');
-    const boxes = [['Direction', 'Cyril Jaouen'], ['Service informatique', ''], ['Responsable / tuteur', 'Sylvain Negri'], ['Alternant Support IT', 'Kylian Grafeille']];
+    const boxes = [['Service informatique', ''], ['Direction', 'Cyril Jaouen'], ['Responsable / tuteur', 'Sylvain Negri'], ['Alternant Support IT', 'Kylian Grafeille']];
     const bx = M + 0.3, bw = 4.6, bh = 0.95, gap = 0.35;
     boxes.forEach(([r, n], i) => {
       const y = 1.85 + i * (bh + gap), me = i === 3;
@@ -333,8 +364,8 @@ async function brandIcon(file) {
     text(s, 'Certification', { x: x + 3.3, y: y + 0.6, w: 3, h: 0.35, fontFace: MONO, fontSize: 13, color: C.muted });
     text(s, 'CCNA', { x: x + 3.3, y: y + 0.95, w: 3.5, h: 0.9, fontSize: 48, bold: true, color: C.white });
     text(s, 'Cisco Certified Network Associate', { x: x + 3.3, y: y + 1.85, w: w - 3.6, h: 0.45, fontSize: 18, color: C.muted });
-    todo(s, 'Statut / date à préciser', x + 3.3, y + 2.55, 3.3, 0.42, 14);
-    s.addNotes('Préciser si la certification CCNA est obtenue (avec la date) ou s\'il s\'agit des modules Cisco NetAcad suivis en formation.');
+    s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: x + 3.3, y: y + 2.55, w: 1.6, h: 0.45, rectRadius: 0.2, fill: { color: '17301F' }, line: { color: C.green, width: 1 } });
+    text(s, 'Certifié', { x: x + 3.3, y: y + 2.55, w: 1.6, h: 0.45, fontFace: MONO, fontSize: 14, color: C.green, align: 'center', valign: 'middle' });
   }
 
   // ================= 12. OUTILS =================
@@ -363,28 +394,36 @@ async function brandIcon(file) {
     card(s, M, 1.8, W - 2 * M, 1.0, '13233A');
     text(s, 'Sujet', { x: M + 0.35, y: 1.9, w: 3, h: 0.3, fontFace: MONO, fontSize: 12, color: C.blue });
     text(s, 'La cybersécurité des objets connectés', { x: M + 0.35, y: 2.2, w: 11, h: 0.5, fontSize: 24, bold: true, color: C.white });
-    const cw = (W - 2 * M - 0.6) / 3, y = 3.1, h = 3.7;
-    // pourquoi
+    const cw = (W - 2 * M - 0.3) / 2, y = 3.1, h = 3.7;
     card(s, M, y, cw, h);
-    iconBox(s, I.alert, M + 0.3, y + 0.3, 0.55);
-    text(s, 'Pourquoi ce sujet ?', { x: M + 1.0, y: y + 0.3, w: cw - 1.2, h: 0.55, fontSize: 17, bold: true, valign: 'middle' });
-    text(s, 'Caméras, imprimantes, badgeuses, capteurs… de plus en plus présents et souvent mal sécurisés : une porte d\'entrée sur le réseau.\n\nLien direct avec le BTS SIO SISR et mon projet de technicien support et réseaux.',
-      { x: M + 0.3, y: y + 1.05, w: cw - 0.6, h: 2.5, fontSize: 13.5 });
-    // Feedly
+    iconBox(s, I.alert, M + 0.35, y + 0.35, 0.6);
+    text(s, 'Pourquoi ce sujet ?', { x: M + 1.15, y: y + 0.35, w: cw - 1.4, h: 0.6, fontSize: 20, bold: true, valign: 'middle' });
+    text(s, [
+      { text: 'Caméras, imprimantes, badgeuses, capteurs… de plus en plus présents et souvent mal sécurisés : une porte d\'entrée sur le réseau.', options: { breakLine: true } },
+      { text: ' ', options: { breakLine: true, fontSize: 8 } },
+      { text: 'Lien direct avec le BTS SIO SISR et mon projet de technicien support et réseaux.' },
+    ], { x: M + 0.35, y: y + 1.2, w: cw - 0.7, h: 2.3, fontSize: 16 });
     const x2 = M + cw + 0.3;
     card(s, x2, y, cw, h);
-    iconBox(s, I.rss, x2 + 0.3, y + 0.3, 0.55);
-    text(s, 'Outil : Feedly', { x: x2 + 1.0, y: y + 0.3, w: cw - 1.2, h: 0.55, fontSize: 17, bold: true, valign: 'middle' });
-    text(s, 'Agrégateur de flux RSS : il regroupe au même endroit les articles de mes sources pour suivre l\'actualité du sujet et conserver les articles importants.',
-      { x: x2 + 0.3, y: y + 1.05, w: cw - 0.6, h: 1.6, fontSize: 13.5 });
-    todo(s, 'Capture Feedly à ajouter', x2 + 0.3, y + 2.95, cw - 0.6, 0.4, 12);
-    // Sources
-    const x3 = x2 + cw + 0.3;
-    card(s, x3, y, cw, h);
-    iconBox(s, I.book, x3 + 0.3, y + 0.3, 0.55);
-    text(s, 'Sources suivies', { x: x3 + 1.0, y: y + 0.3, w: cw - 1.2, h: 0.55, fontSize: 17, bold: true, valign: 'middle' });
+    iconBox(s, I.book, x2 + 0.35, y + 0.35, 0.6);
+    text(s, 'Sources suivies', { x: x2 + 1.15, y: y + 0.35, w: cw - 1.4, h: 0.6, fontSize: 20, bold: true, valign: 'middle' });
     ['CERT-FR', 'RSS – Actualité CNIL', 'IoT Security Foundation', 'OWASP Gen AI Security Project'].forEach((t, i) =>
-      chip(s, t, x3 + 0.3, y + 1.1 + i * 0.55, cw - 0.6));
+      chip(s, t, x2 + 0.35, y + 1.3 + i * 0.55, cw - 0.7));
+  }
+
+  // ================= 13b. FEEDLY =================
+  {
+    const s = newSlide('09', 'Outil de veille : Feedly');
+    const lw = 3.6;
+    card(s, M, 1.85, lw, 4.95);
+    iconBox(s, I.rss, M + 0.35, 2.2, 0.7);
+    text(s, 'Feedly', { x: M + 0.35, y: 3.1, w: lw - 0.7, h: 0.5, fontSize: 22, bold: true, color: C.white });
+    text(s, 'Agrégateur de flux RSS : il regroupe au même endroit les articles de mes sources pour suivre l\'actualité du sujet et conserver les articles importants.',
+      { x: M + 0.35, y: 3.7, w: lw - 0.7, h: 2.0, fontSize: 15 });
+    text(s, 'Dossier « Veille » : 4 sources', { x: M + 0.35, y: 6.05, w: lw - 0.7, h: 0.35, fontFace: MONO, fontSize: 11, color: C.green });
+    const ix = M + lw + 0.3, iw = W - M - ix, ih = iw * 872 / 1661;
+    s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: ix - 0.05, y: 1.85 - 0.05, w: iw + 0.1, h: ih + 0.1, rectRadius: 0.06, fill: { color: C.surface }, line: { color: C.border, width: 1 } });
+    s.addImage({ path: IMG('veille/feedly.png'), x: ix, y: 1.85, w: iw, h: ih, altText: 'Capture de l\'espace Feedly : dossier Veille avec CERT-FR, IoT Security Foundation, OWASP Gen AI Security Project et RSS Actualités CNIL' });
   }
 
   // ================= 14. VEILLE 2 =================
