@@ -20,7 +20,7 @@ assets/img/         photo, logo et captures d'écran
 ## Ce qu'il reste à compléter
 
 Les zones surlignées en jaune **« À compléter »** dans `index.html` sont à remplir
-(organisation de SIKA, statut / date du CCNA). Rien n'a été inventé.
+(organisation de SIKA). Rien n'a été inventé.
 
 ## Images à ajouter
 
